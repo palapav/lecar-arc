@@ -13,6 +13,9 @@ class LRUCache:
         self.head.prev = self.tail
         self.nodeMap = {}
 
+    def clear(self):
+        self.__init__()
+
     def __len__(self):
         return len(self.nodeMap)
 

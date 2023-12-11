@@ -1,6 +1,6 @@
 from flexlru import LRUCache
 
-class Cache:
+class ARCCache:
     def __init__(self, capacity):
         self.p = 0
         self.capacity = capacity
@@ -11,6 +11,12 @@ class Cache:
 
     def __contains__(self, x):
         return x in self.T1 or x in self.T2 or x in self.B1 or x in self.B2
+
+    def __len__(self):
+        """
+        Return the number of bindings in the cache.
+        """
+        return len(self.T1) + len(self.T2) + len(self.B1) + len(self.B2)
 
     def _replace(self, x):
         """
@@ -77,13 +83,6 @@ class Cache:
         elif x not in self:              # Total cache miss
             self._cacheMiss(x)
 
-    def set(self, key, value):
-        """
-        Set an item in the cache.
-
-        :param key: The key for the item.
-        :param value: The value to be stored.
-        """
 
     def get(self, key):
         """
@@ -100,19 +99,9 @@ class Cache:
             self.remove_item(key)
             return None
 
-    def remove(self, key):
-        """
-        Remove an item from the cache.
-
-        :param key: The key for the item to be removed.
-        """
-
-
-    def __len__(self):
-        """
-        Return the number of bindings in the cache.
-        """
-        return len(self.T1) + len(self.T2) + len(self.B1) + len(self.B2)
-
     def clear(self):
         """Clear all items from the cache."""
+        self.T1.clear()
+        self.T2.clear()
+        self.B1.clear()
+        self.B2.clear()
