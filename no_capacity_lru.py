@@ -7,8 +7,14 @@ class Node:
 
 class LRUCache:
     def __init__(self):
-        self.head = Node(0,0)
-        self.tail = Node(0,0)
+        """
+        Instantiate an LRU cache with no fixed capacity.
+
+        Under the hood, uses a linked list where each node's
+        key is a key in a dictionary, mapping to that node.
+        """
+        self.head = Node(-1,-1)
+        self.tail = Node(-1,-1)
         self.tail.next = self.head
         self.head.prev = self.tail
         self.nodeMap = {}
@@ -23,9 +29,15 @@ class LRUCache:
         return len(self.nodeMap)
 
     def clear(self):
+        """Clear all entries from the LRU cache."""
         self.__init__()
 
     def delete(self, x):
+        """
+        Removes the entry from the LRU cache.
+
+        Under the hood, removes the node from the linked list and the dictionary.
+        """
         node = self.nodeMap[x]
         del self.nodeMap[x]
         nxt = node.next
@@ -34,9 +46,22 @@ class LRUCache:
         nxt.prev = prv
 
     def deleteLRU(self):
-        self.delete(self.tail.next.key)
+        """
+        Deletes the LRU entry in the cache.
+
+        Under the hood, deletes the tail of the linked list.
+        """
+        evicted = self.tail.next.key
+        self.delete(evicted)
+        return evicted
 
     def moveToMRU(self, x):
+        """
+        Moves x to the MRU entry of the cache.
+
+        Under the hood, moves the node with key x to the
+        head of the linked list.
+        """
         if x in self.nodeMap:
             self.delete(x)
         node = Node(x, x)
