@@ -18,16 +18,19 @@ class ARCCache:
         """
         return len(self.T1) + len(self.T2) + len(self.B1) + len(self.B2)
 
+    def __str__(self):
+        return f'T1: {self.T1}, T2: {self.T2}, B1: {self.B1}, B2: {self.B2}'
+
     def _replace(self, x):
         """
         REPLACE subroutine for taking a page from T and moving it to B.
         """
         if (len(self.T1) > 0 and (len(self.T1) > self.p)) or (
         x in self.B2 and len(self.T1) == self.p):
-            self.T1.deleteTail()
+            self.T1.deleteLRU()
             self.B1.moveToMRU(x)
         else:
-            self.T2.deleteTail()
+            self.T2.deleteLRU()
             self.B2.moveToMRU(x)
 
     def _topCacheHit(self, x):
@@ -61,43 +64,31 @@ class ARCCache:
         # Case A: L1 has exactly c pages.
         if len(self.T1) + len(self.B1) == self.capacity:
             if len(self.T1) < self.capacity:
-                self.B1.deleteTail()
+                self.B1.deleteLRU()
                 self._replace(x)
             else:
-                self.T1.deleteTail()
+                self.T1.deleteLRU()
         # Case B: L1 has less than c pages.
         elif len(self.T1) + len(self.B1) < self.capacity:
             if len(self) >= self.capacity:
                 if len(self) == 2 * self.capacity:
-                    self.B2.deleteTail()
+                    self.B2.deleteLRU()
                 self._replace(x)
         self.T1.moveToMRU(x)
 
     def request(self, x):
+        """Request x from ARC. Returns True if cache hit, and False otherwise."""
+        hit = False
         if x in self.T1 or x in self.T2: # Cache hit
             self._topCacheHit(x)
+            hit = True
         elif x in self.B1:               # Ghost cache 1 hit
             self._ghostHitOne(x)
         elif x in self.B2:               # Ghost cache 2 hit
             self._ghostHitTwo(x)
         elif x not in self:              # Total cache miss
             self._cacheMiss(x)
-
-
-    def get(self, key):
-        """
-        Get an item from the cache.
-
-        :param key: The key for the item.
-        :return: The value of the item if it exists and is not expired, otherwise returns None.
-        """
-        item = self.cache.get(key)
-        if item and (item['expiration_time'] is None or item['expiration_time'] > datetime.now()):
-            return item['value']
-        else:
-            # Remove expired item from cache
-            self.remove_item(key)
-            return None
+        return hit
 
     def clear(self):
         """Clear all items from the cache."""
