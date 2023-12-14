@@ -17,7 +17,7 @@ if __name__ == '__main__':# Create an ArgumentParser object
             requests += 1
 
             # determine cache to use here once LeCaR built
-            hit = arc_cache.request(int(line))
+            hit = arc_cache.request(line)
 
             if hit:
                 hits += 1
