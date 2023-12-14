@@ -1,4 +1,11 @@
 class Node:
+    """
+    Internal node class to be used for LRU cache in ARC implementation.
+    Note that the key/value pair is redundant given the current cache
+    usage.
+
+    In the event key/value pairs were to be stored in the cache,
+    this Node can then make use of both."""
     def __init__(self, key, val, prev=None, nextt=None):
         self.key = key
         self.val = val

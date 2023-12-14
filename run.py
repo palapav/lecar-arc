@@ -1,9 +1,9 @@
 
 import argparse
-from arccache import ARCCache
+from arc import ARC
 from lecar import LeCaR
 
-if __name__ == '__main__':# Create an ArgumentParser object
+if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='ARC vs LeCaR Cache Evaluation')
     parser.add_argument('algorithm', choices=['lecar', 'arc'], help='Caching algorithm (lecar or arc)')
     parser.add_argument('capacity', type=int, help='Cache capacity')
@@ -14,7 +14,7 @@ if __name__ == '__main__':# Create an ArgumentParser object
 
     cache_algoritm = None
     if args.algorithm == "arc":
-        cache_algoritm = ARCCache(args.capacity)
+        cache_algoritm = ARC(args.capacity)
     elif args.algorithm == "lecar":
         cache_algoritm = LeCaR(args.capacity)
     with open(args.trace_file, 'r') as f:
