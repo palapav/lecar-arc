@@ -1,6 +1,7 @@
 
 import argparse
 from arccache import ARCCache
+from lecar import LeCaR
 
 if __name__ == '__main__':# Create an ArgumentParser object
     parser = argparse.ArgumentParser(description='ARC vs LeCaR Cache Evaluation')
@@ -11,7 +12,11 @@ if __name__ == '__main__':# Create an ArgumentParser object
     args = parser.parse_args()
     requests, hits = 0, 0
 
-    arc_cache = ARCCache(args.capacity)
+    cache_algoritm = None
+    if args.algorithm == "arc":
+        cache_algoritm = ARCCache(args.capacity)
+    elif args.algorithm == "lecar":
+        cache_algoritm = LeCaR(args.capacity)
     with open(args.trace_file, 'r') as f:
         for line in f:
             requests += 1
@@ -22,5 +27,5 @@ if __name__ == '__main__':# Create an ArgumentParser object
             if hit:
                 hits += 1
 
-        print(f'ARC Stats: {hits} hits out of {requests} requests. ' +
+        print(f'{args.algorithm} Stats: {hits} hits out of {requests} requests. ' +
               f'Hit-rate = {round(hits / requests * 100, 2)}%')
