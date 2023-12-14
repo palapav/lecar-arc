@@ -18,7 +18,8 @@ class LeCaR:
             self.history_time = 0 # time page has spent in history, reset once no longer in history
     
     def __init__(self, cache_size) -> None:
-        random.seed(0) # for debugging
+        if cache_size <= 0: raise ValueError("cache size needs to be at least 1")
+        # random.seed(0) # for debugging
         self.cache_size = cache_size
         self.current_time = 0
         
@@ -55,27 +56,25 @@ class LeCaR:
         else: value = self.lfu_history.popitem(last=False)
 
     # q is the page
-    def update_weights(self, page_request_value):
+    def update_weights(self, page_request_value, isLRU):
         page_history_time = page_request_value.history_time
         page_reward = self.discount_rate ** page_history_time
-        page_request_key = page_request_value.request_key
-        if page_request_key in self.lru_history.keys():
+        if isLRU:
             # increase weight for LFU (less regret here)
             self.lfu_weight *= math.exp(self.learning_rate * page_reward)
-        elif page_request_key in self.lfu_history.keys():
+        else:
             self.lru_weight *= math.exp(self.learning_rate * page_reward)
         
         self.lru_weight = self.lru_weight / (self.lru_weight + self.lfu_weight)
-        self.lfu_weight = 1 - self.lfu_weight
+        self.lfu_weight = 1 - self.lru_weight
+
+        print(f"LRU WEIGHT: {self.lru_weight}, LFU WEIGHT: {self.lfu_weight}")
 
     def check_cache_hit(self, requested_page_key):
         found = False
-        if requested_page_key in self.lru.keys() and requested_page_key in self.lfu.keys():
+        if requested_page_key in self.lru.keys():
             found = True
             # reset time clock for this entry
-            # self.lru[requested_page_key].inserted_time = self.current_time
-            # self.lfu[requested_page_key].inserted_time = self.current_time
-            # print(f"is requested page in LFUL{requested_page_key in self.lfu.keys()}")
             self.lru[requested_page_key].inserted_time = self.current_time
             self.lfu[requested_page_key].inserted_time = self.current_time
         return found
@@ -84,42 +83,50 @@ class LeCaR:
         requested_page_value = self.Page(requested_page_key, self.current_time)
 
         if requested_page_key in self.lru_history.keys():
-            print(f"requested page keyzz: {requested_page_key}")
-            # print(f"LRU HISTORY values:{self.lru_history.values()}")
             removed_page_value = self.lru_history.pop(requested_page_key)
-            assert isinstance(removed_page_value, self.Page)
             # inserted time needs to be start of history
             requested_page_value.history_time = self.current_time - removed_page_value.evicted_time
+            self.update_weights(requested_page_value, isLRU=True)
         elif requested_page_key in self.lfu_history.keys():
             removed_page_value = self.lfu_history.pop(requested_page_key)
             requested_page_value.history_time = self.current_time - removed_page_value.evicted_time
         
-        self.update_weights(requested_page_value)
+            self.update_weights(requested_page_value, isLRU=False)
         
         # refactor the below code
         if self._is_cache_full():
-            print(f"CACHE IS FULL NOW!!")
+            # print(f"CACHE IS FULL NOW!!")
             sampled_action = self.sample_action()
-            print(f"sampled action:{sampled_action}")
+            # print(f"sampled action:{sampled_action}")
             if sampled_action == self.LRU_ACTION:
                 if self._is_history_full(isLRU=True): self.del_lru_history(isLRU=True)
                 # if history is not full -> evict from LeCaR LRU cache and add to LRU history
                 evicted_page_key, evicted_page_value = self.lru.popitem()
                 evicted_page_value.evicted_time = self.current_time
-                print(f"eviction time in page value:{evicted_page_value.evicted_time}")
-                self.lru_history[evicted_page_key] = evicted_page_value
+                # print(f"eviction time in page value:{evicted_page_value.evicted_time}")
+                
+                if evicted_page_key != self.lfu.__dict__["_LFUCache__counter"].most_common()[0][0]:
+                    self.lru_history[evicted_page_key] = evicted_page_value
+
+                # evict from LFU using LRU's evicted item
+                self.lfu.pop(evicted_page_key)
             else:
-                if self._is_history_full(isLRU=False): self.del_lru_history(isLRU=True)
+                if self._is_history_full(isLRU=False): self.del_lru_history(isLRU=False)
                 # if history is not full -> evict from LeCaR LFU cache and add to LFU history
                 evicted_page_key, evicted_page_value = self.lfu.popitem()
                 evicted_page_value.evicted_time = self.current_time
-                self.lfu_history[evicted_page_key] = evicted_page_value
+                
+                if evicted_page_key != next(iter(self.lru.__dict__['_LRUCache__order'])):
+                    self.lfu_history[evicted_page_key] = evicted_page_value
+
+                # evict from LRU using LFU's evicted item
+                self.lru.pop(evicted_page_key)
 
         # add to LeCaR cache if its cache is not full
         self.lru[requested_page_key] = requested_page_value
         self.lfu[requested_page_key] = requested_page_value
 
-    def process(self, requested_page):
+    def request(self, requested_page):
         if not isinstance(requested_page, int): raise ValueError("request is not of type int")
         # request is of type int
         found = None
@@ -129,14 +136,14 @@ class LeCaR:
         return found
 
 def main():
-    lecar_cache = LeCaR(cache_size=10)
+    lecar_cache = LeCaR(cache_size=4)
     NUM_REQUESTS = 1000
     cache_hits = 0
     for i in range(NUM_REQUESTS):
         print(f"Iteration:{i}")
         # print(f"LRU cache numbers:{lecar_cache.lru.keys()}")
         rand_number = random.randint(0,10)
-        found = lecar_cache.process(rand_number)
+        found = lecar_cache.request(rand_number)
         if found: cache_hits +=1
 
 
