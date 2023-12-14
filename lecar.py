@@ -68,12 +68,14 @@ class LeCaR:
         self.lru_weight = self.lru_weight / (self.lru_weight + self.lfu_weight)
         self.lfu_weight = 1 - self.lru_weight
 
-        print(f"LRU WEIGHT: {self.lru_weight}, LFU WEIGHT: {self.lfu_weight}")
+        # print(f"LRU WEIGHT: {self.lru_weight}, LFU WEIGHT: {self.lfu_weight}")
 
     def check_cache_hit(self, requested_page_key):
         found = False
+        # print(f"I am here?")
         if requested_page_key in self.lru.keys():
             found = True
+            # print(f"requested page key: {requested_page_key}")
             # reset time clock for this entry
             self.lru[requested_page_key].inserted_time = self.current_time
             self.lfu[requested_page_key].inserted_time = self.current_time
@@ -107,6 +109,8 @@ class LeCaR:
                 
                 if evicted_page_key != self.lfu.__dict__["_LFUCache__counter"].most_common()[0][0]:
                     self.lru_history[evicted_page_key] = evicted_page_value
+                
+                # self.lru_history[evicted_page_key] = evicted_page_value
 
                 # evict from LFU using LRU's evicted item
                 self.lfu.pop(evicted_page_key)
@@ -119,6 +123,8 @@ class LeCaR:
                 if evicted_page_key != next(iter(self.lru.__dict__['_LRUCache__order'])):
                     self.lfu_history[evicted_page_key] = evicted_page_value
 
+                # self.lfu_history[evicted_page_key] = evicted_page_value
+
                 # evict from LRU using LFU's evicted item
                 self.lru.pop(evicted_page_key)
 
@@ -127,7 +133,8 @@ class LeCaR:
         self.lfu[requested_page_key] = requested_page_value
 
     def request(self, requested_page):
-        if not isinstance(requested_page, int): raise ValueError("request is not of type int")
+        # print("Am I here making requests?")
+        # if not isinstance(requested_page, int): raise ValueError("request is not of type int")
         # request is of type int
         found = None
         self.current_time += 1
@@ -140,7 +147,7 @@ def main():
     NUM_REQUESTS = 1000
     cache_hits = 0
     for i in range(NUM_REQUESTS):
-        print(f"Iteration:{i}")
+        # print(f"Iteration:{i}")
         # print(f"LRU cache numbers:{lecar_cache.lru.keys()}")
         rand_number = random.randint(0,10)
         found = lecar_cache.request(rand_number)
