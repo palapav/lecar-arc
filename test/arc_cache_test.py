@@ -1,5 +1,6 @@
 import unittest
-
+import sys
+sys.path.append("..")
 from arc import ARC
 
 class TestARCCache(unittest.TestCase):

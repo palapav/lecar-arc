@@ -67,7 +67,7 @@ def process_trace(trace_file, output_csv):
 traces_directory = "traces"
 
 # Output CSV file
-output_csv_path = "simulation_eval.csv"
+output_csv_path = "evals/simulation_eval.csv"
 
 # Iterate through trace files
 for trace_file in os.listdir(traces_directory):
