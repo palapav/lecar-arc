@@ -35,6 +35,8 @@ class LeCaR:
         self.lru_weight, self.lfu_weight = self.weight, 1-self.weight
         
         self.weights = [self.lru_weight, self.lfu_weight]
+        self.weights_collection = []
+
         self.LRU_ACTION = 0
         self.LFU_ACTION = 1
         self.action_types = [self.LRU_ACTION,self.LFU_ACTION]
@@ -68,15 +70,11 @@ class LeCaR:
         self.lru_weight = self.lru_weight / (self.lru_weight + self.lfu_weight)
         self.lfu_weight = 1 - self.lru_weight
 
-        # print(f"LRU WEIGHT: {self.lru_weight}, LFU WEIGHT: {self.lfu_weight}")
-
     def check_cache_hit(self, requested_page_key):
         found = False
-        # print(f"I am here?")
-        if requested_page_key in self.lru.keys():
+        if requested_page_key in self.lru.keys() and requested_page_key in self.lfu.keys():
             found = True
-            # print(f"requested page key: {requested_page_key}")
-            # reset time clock for this entry
+            # reset time clocks to update accesses
             self.lru[requested_page_key].inserted_time = self.current_time
             self.lfu[requested_page_key].inserted_time = self.current_time
         return found
@@ -94,23 +92,18 @@ class LeCaR:
             requested_page_value.history_time = self.current_time - removed_page_value.evicted_time
         
             self.update_weights(requested_page_value, isLRU=False)
-        
-        # refactor the below code
+
         if self._is_cache_full():
-            # print(f"CACHE IS FULL NOW!!")
             sampled_action = self.sample_action()
-            # print(f"sampled action:{sampled_action}")
             if sampled_action == self.LRU_ACTION:
                 if self._is_history_full(isLRU=True): self.del_lru_history(isLRU=True)
                 # if history is not full -> evict from LeCaR LRU cache and add to LRU history
                 evicted_page_key, evicted_page_value = self.lru.popitem()
                 evicted_page_value.evicted_time = self.current_time
-                # print(f"eviction time in page value:{evicted_page_value.evicted_time}")
                 
+                # only add to history if evicted item from LRU and potential LFU are different
                 if evicted_page_key != self.lfu.__dict__["_LFUCache__counter"].most_common()[0][0]:
                     self.lru_history[evicted_page_key] = evicted_page_value
-                
-                # self.lru_history[evicted_page_key] = evicted_page_value
 
                 # evict from LFU using LRU's evicted item
                 self.lfu.pop(evicted_page_key)
@@ -123,8 +116,6 @@ class LeCaR:
                 if evicted_page_key != next(iter(self.lru.__dict__['_LRUCache__order'])):
                     self.lfu_history[evicted_page_key] = evicted_page_value
 
-                # self.lfu_history[evicted_page_key] = evicted_page_value
-
                 # evict from LRU using LFU's evicted item
                 self.lru.pop(evicted_page_key)
 
@@ -133,9 +124,7 @@ class LeCaR:
         self.lfu[requested_page_key] = requested_page_value
 
     def request(self, requested_page):
-        # print("Am I here making requests?")
-        # if not isinstance(requested_page, int): raise ValueError("request is not of type int")
-        # request is of type int
+        self.weights_collection.append([self.lru_weight, self.lfu_weight])
         found = None
         self.current_time += 1
         found = self.check_cache_hit(requested_page)
@@ -147,12 +136,9 @@ def main():
     NUM_REQUESTS = 1000
     cache_hits = 0
     for i in range(NUM_REQUESTS):
-        # print(f"Iteration:{i}")
-        # print(f"LRU cache numbers:{lecar_cache.lru.keys()}")
         rand_number = random.randint(0,10)
         found = lecar_cache.request(rand_number)
         if found: cache_hits +=1
-
 
     print(f"Hit rate: {cache_hits/NUM_REQUESTS}")
 
