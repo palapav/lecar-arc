@@ -20,4 +20,3 @@ for iter, NUM_REQUESTS in enumerate(NUM_REQUESTS_SET):
         for number in workload:
             file.write(str(number) + '\n')
 
-
