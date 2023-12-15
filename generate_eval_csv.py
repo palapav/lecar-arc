@@ -7,7 +7,7 @@ def process_trace(trace_file, output_csv):
     """
     Process a trace file and generate CSV data about cache hit ratio.
     """
-    cache_sizes = [1024, 4096, 16384, 131072, 262144, 524288]
+    cache_sizes = [256, 512, 1024, 4096, 16384, 131072]
     csv_data = []
 
     # Read the trace file and process with different cache sizes

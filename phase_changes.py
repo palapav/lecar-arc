@@ -1,4 +1,4 @@
-"""Contains synthetic workload generation with and without phase changes"""
+"""Contains synthetic workload generation with phase changes"""
 
 import random
 
