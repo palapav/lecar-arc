@@ -14,8 +14,8 @@ class LeCaR:
         def __init__(self, request_key, current_time) -> None:
             self.inserted_time = current_time
             self.request_key = request_key # request of type int from user
-            self.evicted_time = None
-            self.history_time = 0 # time page has spent in history, reset once no longer in history
+            self.evicted_time = None # current time - time of page insertion in cache
+            self.history_time = 0 # time page has spent in history
     
     def __init__(self, cache_size) -> None:
         if cache_size <= 0: raise ValueError("cache size needs to be at least 1")
@@ -23,7 +23,7 @@ class LeCaR:
         self.cache_size = cache_size
         self.current_time = 0
         
-        # initial RL parameters
+        # initial RL parameters as specified in the LeCaR paper
         self.weight = 0.5
         self.learning_rate = 0.45
         self.discount_rate = 0.005 ** (1 / self.cache_size)
@@ -35,17 +35,19 @@ class LeCaR:
         self.lru_weight, self.lfu_weight = self.weight, 1-self.weight
         
         self.weights = [self.lru_weight, self.lfu_weight]
-        self.weights_collection = []
+        self.weights_collection = [] # for graphing
 
         self.LRU_ACTION = 0
         self.LFU_ACTION = 1
         self.action_types = [self.LRU_ACTION,self.LFU_ACTION]
     
     def _is_cache_full(self):
+        """checks whether the LeCaR cache is full"""
         # can choose either LRU or LFU cache for checking if LeCaR cache is full
         return self.lru.currsize == self.cache_size
     
     def _is_history_full(self, isLRU):
+        """checks whether the LRU/LFU history is full best on boolean param"""
         if isLRU: return len(self.lru_history.keys()) == self.cache_size
         return len(self.lfu_history.keys()) == self.cache_size
     
@@ -54,10 +56,12 @@ class LeCaR:
         return random.choices(self.action_types, weights=self.weights)[0]
     
     def del_lru_history(self, isLRU):
+        """deletes FIFO item from LRU/LFU history based on boolean parameter"""
         if isLRU: value = self.lru_history.popitem(last=False)
         else: value = self.lfu_history.popitem(last=False)
 
     def update_weights(self, page_request_value, isLRU):
+        """updates weight for either LRU or LFU based on incoming page request"""
         page_history_time = page_request_value.history_time
         page_reward = self.discount_rate ** page_history_time
         if isLRU:
@@ -70,6 +74,11 @@ class LeCaR:
         self.lfu_weight = 1 - self.lru_weight
 
     def check_cache_hit(self, requested_page_key):
+        """
+        Checks if requested_page is in both LRU and LFU caches
+        and updates accesses for LRU and LFU.
+        returns True if there is a cache hit.
+        """
         found = False
         if requested_page_key in self.lru.keys() and requested_page_key in self.lfu.keys():
             found = True
@@ -79,6 +88,10 @@ class LeCaR:
         return found
     
     def process_cache_miss(self, requested_page_key):
+        """
+        Adds to requested page key to cache on cache miss, potentially evicts, and
+        updates LRU/LFU history in the process
+        """
         requested_page_value = self.Page(requested_page_key, self.current_time)
 
         if requested_page_key in self.lru_history.keys():
@@ -123,6 +136,10 @@ class LeCaR:
         self.lfu[requested_page_key] = requested_page_value
 
     def request(self, requested_page):
+        """
+        makes LeCaR cache request for given requested_page
+        returns boolean value of cache miss or hit
+        """
         self.weights_collection.append([self.lru_weight, self.lfu_weight])
         found = None
         self.current_time += 1
