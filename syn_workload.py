@@ -1,9 +1,9 @@
 """Contains very large synthetic workload generation (no phase changes)"""
 import random
 
-NUM_REQUESTS_SET = [100000, 250000, 500000]
+NUM_REQUESTS_SET = [50000, 100000, 150000]
 
-UNIVERSE_SET_SIZE = 200000
+UNIVERSE_SET_SIZE = 25000
 UNIVERSE_SET = list(range(1, UNIVERSE_SET_SIZE+1))
 WORKING_SET_SIZE = int(0.25 * UNIVERSE_SET_SIZE) # arbitrarily determined
 

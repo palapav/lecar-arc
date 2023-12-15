@@ -5,6 +5,7 @@ __pycache__/
 azurefunctions-accesses-2020.csv.bz2
 batch.txt
 test.py
+azure_requests.txt
 
 # C extensions
 *.so

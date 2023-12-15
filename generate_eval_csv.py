@@ -7,11 +7,13 @@ def process_trace(trace_file, output_csv):
     """
     Process a trace file and generate CSV data about cache hit ratio.
     """
-    cache_sizes = [256, 512, 1024, 4096, 16384, 131072]
+    cache_sizes = [64, 128, 256, 512, 1024, 4096]
     csv_data = []
 
     # Read the trace file and process with different cache sizes
+    print("Another trace!")
     for c in cache_sizes:
+        print(f"cache: {c}")
         arc_cache = ARC(c)
         lecar_cache = LeCaR(c)
 
@@ -71,4 +73,4 @@ output_csv_path = "simulation_eval.csv"
 for trace_file in os.listdir(traces_directory):
     if trace_file.endswith(".txt"):
         trace_file_path = os.path.join(traces_directory, trace_file)
-        process_trace(trace_file_path, output_csv_path)
+process_trace(trace_file_path, output_csv_path)
