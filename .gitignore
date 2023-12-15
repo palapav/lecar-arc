@@ -1,12 +1,10 @@
 # Byte-compiled / optimized / DLL files
-test.py
-batch.txt
-azurefunctions-accesses-2020.csv.bz2
-official_lecar.py
-requests.txt
 __pycache__/
 *.py[cod]
 *$py.class
+azurefunctions-accesses-2020.csv.bz2
+batch.txt
+test.py
 
 # C extensions
 *.so

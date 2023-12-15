@@ -1,6 +1,6 @@
 from no_capacity_lru import LRUCache
 
-class ARCCache:
+class ARC:
     def __init__(self, capacity):
         self.p = 0                  # The "target size" for T1. Closer to capacity -> Favors T1
         self.capacity = capacity    # The fixed capacity of the cache (|T1| + |T2|)
@@ -49,7 +49,7 @@ class ARCCache:
 
     def _ghostHitOne(self, x):
         """Move x to the MRU position of T2. Increase size of T1."""
-        d1 = 1 if len(self.B1) > len(self.B2) else (len(self.B2) / len(self.B1))
+        d1 = 1 if len(self.B1) > len(self.B2) else (len(self.B2) // len(self.B1))
         self.p = min(self.p + d1, self.capacity)
 
         self._replace(x)
@@ -58,7 +58,7 @@ class ARCCache:
 
     def _ghostHitTwo(self, x):
         """Move x to the MRU position of T2. Increase size of T2."""
-        d2 = 1 if len(self.B2) > len(self.B1) else (len(self.B1) / len(self.B2))
+        d2 = 1 if len(self.B2) > len(self.B1) else (len(self.B1) // len(self.B2))
         self.p = max(self.p - d2, 0)
         self._replace(x)
 

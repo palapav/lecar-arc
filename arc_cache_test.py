@@ -1,11 +1,11 @@
 import unittest
 
-from arccache import ARCCache
+from arc import ARC
 
 class TestARCCache(unittest.TestCase):
     def test_cache_operations(self):
         # Initialize your cache (replace ARCCacheClass with the actual name of your class)
-        arc_cache = ARCCache(3)
+        arc_cache = ARC(3)
 
         # Test initial state
         self.assertEqual(len(arc_cache), 0)
