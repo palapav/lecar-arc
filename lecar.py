@@ -57,7 +57,6 @@ class LeCaR:
         if isLRU: value = self.lru_history.popitem(last=False)
         else: value = self.lfu_history.popitem(last=False)
 
-    # q is the page
     def update_weights(self, page_request_value, isLRU):
         page_history_time = page_request_value.history_time
         page_reward = self.discount_rate ** page_history_time
