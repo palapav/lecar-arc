@@ -27,9 +27,9 @@ python run.py <cache_capacity> <trace_file>
 python run.py 1000 my_trace_file.txt
 ```
 
-Replace 1000 with your desired cache capacity and my_trace_file.txt with the actual trace file.
+Replace 1000 with your desired cache capacity and my_trace_file.txt with the actual trace file. If you would like to use one of our created trace files, for example, use the following instead of my my_trace_file.txt: traces/syn_workload1.txt
 
 ## Results
 
-The program supports two caching algorithms: ARC and LeCaR. Both algorithms will be evaluated, and the results (hits, requests, hit ratio) will be displayed.
+The program supports two caching algorithms: ARC and LeCaR. Both algorithms will be evaluated, and the results (hits, requests, hit ratio) will be displayed. Detailed evaluation results are presented in the evals folder. Code for these evaluations are presented outside of this folder (generate_eval_csv.py, phase_changes.py, syn_workload.py, etc.).
 
